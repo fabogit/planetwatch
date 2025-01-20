@@ -36,11 +36,57 @@ export class DataService {
 
   // Method to read all data from the database
   async getAllData(): Promise<DataTable[]> {
-    return this.prisma.dataTable.findMany();
+    try {
+      return this.prisma.dataTable.findMany();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateData(
+    name: string,
+    update: { value?: string; required?: boolean },
+  ): Promise<DataTable> {
+    try {
+      return await this.prisma.dataTable.update({
+        where: { DataName: name },
+        data: {
+          ...(update.value !== undefined && { DataValue: update.value }),
+          ...(update.required !== undefined && {
+            DataRequired: update.required,
+          }),
+        },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new Error(`Data with name "${name}" not found.`);
+      }
+      throw error;
+    }
+  }
+
+  // Method to delete data by name
+  async deleteData(name: string): Promise<DataTable> {
+    try {
+      return await this.prisma.dataTable.delete({
+        where: { DataName: name },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new Error(`Data with name "${name}" not found.`);
+      }
+      throw error;
+    }
   }
 
   // Method to get the custom "env" variable
   async getEnvVariable(envVariable: string): Promise<string> {
-    return this.configService.get<string>(envVariable) || 'Variable not found';
+    try {
+      return (
+        this.configService.get<string>(envVariable) || 'Variable not found'
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 }
