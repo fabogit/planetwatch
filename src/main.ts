@@ -3,6 +3,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma/prisma.service';
+import { GlobalExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap', { timestamp: true });
@@ -14,13 +15,16 @@ async function bootstrap() {
   // Initialize PrismaService and test database connection
   const prismaService = app.get(PrismaService);
   try {
-    logger.log('Attempting database connection...');
+    logger.debug('Attempting database connection...');
     await prismaService.$connect();
-    logger.log('Database connection established successfully.');
+    logger.debug('Database connection established successfully.');
   } catch (error) {
     logger.error('Failed to connect to the database:', error.stack);
     process.exit(1);
   }
+
+  // Register Error handler
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Enable global validation pipe
   app.useGlobalPipes(

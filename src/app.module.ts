@@ -1,9 +1,9 @@
+import { APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { DataModule } from './modules/data/data.module';
+import { GlobalExceptionFilter } from './filters/http-exception.filter';
 import { PrismaModule } from './prisma/prisma.module';
-import { DataModule } from './data/data.module';
 
 @Module({
   imports: [
@@ -13,7 +13,12 @@ import { DataModule } from './data/data.module';
     PrismaModule,
     DataModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

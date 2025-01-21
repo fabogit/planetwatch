@@ -99,10 +99,244 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 
-#
+~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-`docker-compose --env-file docker.env up`
+# Project Readme
 
-`pnpm i`
+This project is a Node.js application written in TypeScript. It implements three REST APIs and interacts with a PostgreSQL database. The APIs are hosted on `localhost:{PORT}` and handle data storage, retrieval, and environment variable access. Below is an overview of the requirements, implementation details, and setup instructions.
+
+---
+
+## Features
+
+1. **API to Write Data to the Database**
+
+   - Endpoint: `/write`
+   - Method: `POST`
+   - Accepts JSON payload with the following format:
+     ```json
+     {
+       "name": "string",
+       "value": "string",
+       "required": "boolean"
+     }
+     ```
+   - Adds data to the database or fails if the `name` is already present.
+
+2. **API to Read Data from the Database**
+
+   - Endpoint: `/read`
+   - Method: `GET`
+   - Returns all rows from the database in JSON format.
+
+3. **API to Read Custom Variable (`env`)**
+   - Endpoint: `/env`
+   - Method: `GET`
+   - Returns the value of the custom environment variable defined in `constants.ts`.
+
+---
+
+## Data Model
+
+- Table Name: `DataTable`
+- Columns:
+  - `id` (Primary Key, Auto Increment)
+  - `DataName` (String, Unique)
+  - `DataValue` (String)
+  - `DataRequired` (Boolean)
+
+---
+
+## Technical Details
+
+- **Framework**: NestJS
+- **Language**: TypeScript
+- **Database**: PostgreSQL
+- **Build Tool**: `tsc`
+- **Environment Variables**: Defined in `constants.ts`
+- **ORM**: Prisma
+
+---
+
+## Features Implemented
+
+- OpenAPI documentation using Swagger.
+- JSDoc comments for functions.
+- Automatic database table creation and migrations using Prisma.
+- Code linting with ESLint.
+- Input validation using class-validator.
+- REST APIs to update and delete data rows.
+- Configurable port using environment variables.
+- Dockerized PostgreSQL database for easy setup.
+
+---
+
+## Project Structure
+
+```
+docker/
+├── docker-compose.yaml
+├── docker.env
+prisma/
+├── schema.prisma
+├── migrations/
+src/
+├── app.module.ts
+├── main.ts
+├── modules/
+│ ├── data/
+│ │ ├── data.controller.ts
+│ │ ├── data.service.ts
+│ │ ├── data.module.ts
+│ │ ├── dto/
+│ │ │ ├── create-data.dto.ts
+│ │ │ ├── update-data.dto.ts
+.env
+```
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+
+- Git
+- Node.js LTS (v22+)
+- Docker
+- pnpm (preferred package manager)
+
+### Install Dependencies
+
+`pnpm install`
+
+Set Up Environment Variables Create a .env file in the project root with the following content:
+
+```
+DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/mydatabase"
+PORT=3000
+VARIABLE="a string"
+```
+
+### Run Database in Docker
+
+`pnpm run docker up` and `pnpm run docker down`
+
+### Generate schema
 
 `pnpm prisma generate`
+
+### Run Migrations
+
+`pnpm prisma migrate dev`
+
+### Start the Server
+
+`pnpm start`
+
+## API Endpoints
+
+### 1. Create a New Data Entry
+
+- **Endpoint**: `POST /data`
+- **Description**: Adds a new data entry to the database.
+- **Request Body**:
+
+    ```json
+    {
+    "name": "exampleName",
+    "value": "exampleValue",
+    "required": true
+    }
+    ```
+
+- **Responses**:
+
+  - `201 Created`: Data created successfully.
+
+  - `400 Bad Request`: Invalid request or server error.
+
+  - `409 Conflict`: Data with this name already exists.
+
+### 2. Get All Data Entries
+
+- **Endpoint**: GET /data
+- **Description**: Retrieves all data entries from the database.
+- **Responses**:
+
+  - `200 OK`: Returns an array of data entries.
+
+    ```json
+    [
+        {
+        "id": 1,
+        "DataName": "exampleName",
+        "DataValue": "exampleValue",
+        "DataRequired": true
+        }
+    ]
+    ```
+
+  - `400 Bad Request`: Server error.
+
+### 3. Update an Existing Data Entry
+
+- **Endpoint**: PATCH /data/:name
+- **Description**: Updates an existing data entry by its name.
+- **Request** Parameters: name (string, path): The name of the data entry to update.
+- **Request** Body:
+
+    ```json
+    {
+    "value": "updatedValue",
+    "required": false
+    }
+    ```
+
+- **Responses**:
+
+  - `200 OK`: Data updated successfully.
+
+  - `400 Bad Request`: Invalid request or server error.
+
+  - `404 Not Found`: Data with the given name does not exist.
+
+### 4. Delete a Data Entry
+
+- **Endpoint**: DELETE /data/:name
+- **Description**: Deletes an existing data entry by its name.
+- **Request Parameters**: name (string, path): The name of the data entry to delete.
+
+- **Responses**:
+
+  - `200 OK`: Data deleted successfully.
+
+  - `400 Bad Request`: Server error.
+
+  - `404 Not Found`: Data with the given name does not exist.
+
+### 5. Get the Value of an Environment Variable
+
+- **Endpoint**: GET /data/env
+- **Description**: Retrieves the value of an environment variable by its key.
+
+- **Request Query**:
+  key (string, query): The key of the environment variable.
+
+- **Responses**:
+
+  - `200 OK`: Returns the value of the requested environment variable.
+
+    ```json
+    {
+        "key": "exampleKey",
+        "value": "exampleValue"
+    }
+    ```
+
+  - `400 Bad Request`: Missing or invalid key query parameter.
+
+  - `404 Not Found`: Environment variable with the given key does not exist.
+
+All REST APIs return JSON responses.
+
+API documentation is available at http://localhost:{PORT}/api.
