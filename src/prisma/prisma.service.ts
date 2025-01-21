@@ -6,12 +6,17 @@ import {
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
+/**
+ * PrismaService extends PrismaClient and manages the database connection lifecycle.
+ * Implements OnModuleInit and OnModuleDestroy for integration with NestJS lifecycle hooks.
+ */
 @Injectable()
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
   private readonly logger = new Logger(PrismaService.name, { timestamp: true });
+
   constructor() {
     super();
   }
@@ -19,6 +24,7 @@ export class PrismaService
   /**
    * Lifecycle hook that is called when the module is initialized.
    * Establishes the database connection.
+   * @throws Error if the database connection fails.
    */
   async onModuleInit() {
     try {

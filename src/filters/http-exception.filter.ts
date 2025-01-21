@@ -7,12 +7,24 @@ import {
   Logger,
 } from '@nestjs/common';
 
+/**
+ * A global exception filter for handling and logging exceptions consistently.
+ *
+ * This filter captures all exceptions thrown within the application and:
+ * - Logs the error details using nestjs `Logger`.
+ * - Sends a consistent error response to the client.
+ */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name, {
     timestamp: true,
   });
 
+  /**
+   * Handles exceptions and formats the HTTP response.
+   * @param exception - The caught exception.
+   * @param host - The execution context containing request and response objects.
+   */
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -30,13 +42,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           : (responseMessage as any).message || message;
     }
 
-    // Log the error for debugging purposes
     this.logger.error(
       `HTTP ${status} Error: ${message}`,
       exception instanceof Error ? exception.stack : undefined,
     );
 
-    // Send a consistent error response
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),

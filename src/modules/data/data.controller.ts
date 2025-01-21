@@ -7,7 +7,6 @@ import {
   Delete,
   Param,
   Patch,
-  BadRequestException,
 } from '@nestjs/common';
 import { DataService } from './data.service';
 import { CreateDataDto } from './dto/create-data.dto';
@@ -19,6 +18,11 @@ import { UpdateDataDto } from './dto/update-data.dto';
 export class DataController {
   constructor(private readonly dataService: DataService) {}
 
+  /**
+   * Create a new data entry.
+   * @param createDataDto - Data to be created.
+   * @returns The created data entry.
+   */
   @ApiOperation({ summary: 'Create a new data entry' })
   @ApiResponse({ status: 201, description: 'Data created successfully.' })
   @ApiResponse({
@@ -30,6 +34,10 @@ export class DataController {
     return this.dataService.createData(createDataDto);
   }
 
+  /**
+   * Retrieve all data entries.
+   * @returns An array of all data entries.
+   */
   @ApiOperation({ summary: 'Get all data entries' })
   @ApiResponse({ status: 200, description: 'Data retrieved successfully.' })
   @Get()
@@ -37,6 +45,12 @@ export class DataController {
     return this.dataService.getAllData();
   }
 
+  /**
+   * Update an existing data entry by name.
+   * @param name - Name of the data entry to update.
+   * @param updateDataDto - Updated data values.
+   * @returns The updated data entry.
+   */
   @ApiOperation({ summary: 'Update an existing data entry by name' })
   @ApiResponse({ status: 200, description: 'Data updated successfully.' })
   @ApiResponse({ status: 404, description: 'Data not found.' })
@@ -48,6 +62,11 @@ export class DataController {
     return this.dataService.updateData(name, updateDataDto);
   }
 
+  /**
+   * Delete a data entry by name.
+   * @param name - Name of the data entry to delete.
+   * @returns The deleted data entry.
+   */
   @ApiOperation({ summary: 'Delete a data entry by name' })
   @ApiResponse({ status: 200, description: 'Data deleted successfully.' })
   @ApiResponse({ status: 404, description: 'Data not found.' })
@@ -56,6 +75,12 @@ export class DataController {
     return this.dataService.deleteData(name);
   }
 
+  /**
+   * Get the value of an environment variable.
+   * @param key - The key of the environment variable.
+   * @returns The value of the environment variable.
+   * @throws Error if the key is missing.
+   */
   @ApiOperation({ summary: 'Get the value of an environment variable' })
   @ApiResponse({
     status: 200,
